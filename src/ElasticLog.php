@@ -20,6 +20,7 @@ class ElasticLog implements LogHandlerInterface
      */
     private $client;
 
+
     /**
      * 配置参数
      * @var array
