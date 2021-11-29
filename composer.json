@@ -3,7 +3,7 @@
   "description": "这是thinkphp6.0日志驱动",
   "type": "library",
   "keywords": [
-    "xiegaosheng/think-log-driver",
+    "think-log-driver",
     "thinkphp",
     "log"
   ],
