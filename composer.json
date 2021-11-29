@@ -18,5 +18,7 @@
         "psr-4": {
             "think\\log\\driver\\": "src/"
         }
-    }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
 }
