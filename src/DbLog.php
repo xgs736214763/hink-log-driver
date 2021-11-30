@@ -149,7 +149,7 @@ class DbLog implements LogHandlerInterface
             }
 
         }
-        return Db::name($table)->insert($table);
+        return Db::name($table)->insert($data);
        // return error_log($message, 3, $destination);
     }
 
