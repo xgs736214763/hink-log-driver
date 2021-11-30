@@ -130,8 +130,8 @@ class ElasticLog implements LogHandlerInterface
         $runtime = 0;
         if (isset($info['sql']))//如果是sql日志记录查询时间
         {
-            if(0 === strpos($message,'[sql] SHOW FULL COLUMNS') || 0 === strpos($message,'[sql] CONNECT:[ UseTime')){
-                $runtime = 0;
+            if(false !== strpos($message,'[sql] SHOW FULL COLUMNS') || false !== strpos($message,'[sql] CONNECT:[ UseTime')){
+                return true;
             }else{
                 $cnt = count($info);
                 $runtime_arr = explode(':',trim($info[$cnt-1]));
