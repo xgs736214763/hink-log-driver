@@ -122,10 +122,11 @@ class DbLog implements LogHandlerInterface
         $data['log'] = $message;
         $data['created_at'] = date('Y-m-d H:i:s');
         $runtime = 0;
+        //dd($info);
         if (isset($info['sql']))//如果是sql日志记录查询时间
         {
-            if(0 === strpos($message,'[sql] SHOW FULL COLUMNS') || 0 === strpos($message,'[sql] CONNECT:[ UseTime')){
-                $runtime = 0;
+            if(false !== strpos($message,'[sql] SHOW FULL COLUMNS') || false !== strpos($message,'[sql] CONNECT:[ UseTime')){
+                return true;
             }else{
                 $cnt = count($info);
                 $runtime_arr = explode(':',trim($info[$cnt-1]));
@@ -149,8 +150,9 @@ class DbLog implements LogHandlerInterface
             }
 
         }
-        return Db::name($table)->insert($data);
-       // return error_log($message, 3, $destination);
+        return Db::name($table)->data($data)->save();
+
+        // return error_log($message, 3, $destination);
     }
 
     /**
