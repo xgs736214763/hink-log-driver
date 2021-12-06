@@ -17,7 +17,7 @@ return [
 type= \think\log\driver\DbLog::class
 //写入数据库的表名
 'table' => 'logs',
-'db_type' => 'mongo',`
+'db_type' => 'mongo', //默认是default
 ~~~
 * 创建数据表
 ~~~

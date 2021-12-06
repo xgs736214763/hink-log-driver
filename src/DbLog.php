@@ -150,10 +150,15 @@ class DbLog implements LogHandlerInterface
         }
         //mongo
         try {
-            if ($this->config['db_type'] == 'mongo') {
-                return Db::connect('mongo')->name($table)->data($data)->save();
+            if (empty($this->config['db_type'])){
+                $this->config['db_type'] = 'default';
             }
-            return Db::name($table)->data($data)->save();
+            if ($this->config['db_type'] == 'default') {
+                return Db::name($table)->data($data)->save();
+            }else{
+                return Db::connect($this->config['db_type'])->name($table)->data($data)->save();
+            }
+
         } catch (\Exception $e) {
             Log::channel('file')->write('入库失败：' . $e->getMessage());
             return $e->getMessage();
