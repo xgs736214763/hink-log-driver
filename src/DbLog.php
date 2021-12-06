@@ -21,15 +21,15 @@ class DbLog implements LogHandlerInterface
      * @var array
      */
     protected $config = [
-        'time_format'  => 'c',
-        'single'       => false,
-        'file_size'    => 2097152,
-        'path'         => '',
-        'apart_level'  => [],
-        'max_files'    => 0,
-        'json'         => false,
+        'time_format' => 'c',
+        'single' => false,
+        'file_size' => 2097152,
+        'path' => '',
+        'apart_level' => [],
+        'max_files' => 0,
+        'json' => false,
         'json_options' => JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES,
-        'format'       => '[%s][%s] %s',
+        'format' => '[%s][%s] %s',
     ];
 
     // 实例化并传入参数
@@ -102,7 +102,7 @@ class DbLog implements LogHandlerInterface
     /**
      * 日志写入
      * @access protected
-     * @param array  $message     日志信息
+     * @param array $message 日志信息
      * @param string $destination 日志文件
      * @return bool
      */
@@ -125,13 +125,12 @@ class DbLog implements LogHandlerInterface
         //dd($info);
         if (isset($info['sql']))//如果是sql日志记录查询时间
         {
-            if(false !== strpos($message,'[sql] SHOW FULL COLUMNS') || false !== strpos($message,'[sql] CONNECT:[ UseTime')){
+            if (false !== strpos($message, '[sql] SHOW FULL COLUMNS') || false !== strpos($message, '[sql] CONNECT:[ UseTime')) {
                 return true;
-            }else{
+            } else {
                 $cnt = count($info);
-                $runtime_arr = explode(':',trim($info[$cnt-1]));
-                if (count($runtime_arr) == 2)
-                {
+                $runtime_arr = explode(':', trim($info[$cnt - 1]));
+                if (count($runtime_arr) == 2) {
                     $runtime = floatval($runtime_arr[1]);
                 }
             }
@@ -139,19 +138,26 @@ class DbLog implements LogHandlerInterface
         $data['runtime'] = $runtime;
         $table = $this->config['table'];
         //日志通知
-        if (isset($this->config['notice']) && $this->config['notice'] instanceof NoticeLog)
-        {
+        if (isset($this->config['notice']) && $this->config['notice'] instanceof NoticeLog) {
             try {
                 $notice = new $this->config['notice']();
                 $notice->run($data);
-            }catch (\Exception $e)
-            {
-                Log::channel('file')->write('日志通知失败'.$e->getMessage());
+            } catch (\Exception $e) {
+                Log::channel('file')->write('日志通知失败' . $e->getMessage());
+                return $e->getMessage();
             }
 
         }
-        return Db::name($table)->data($data)->save();
-
+        //mongo
+        try {
+            if ($this->config['db_type'] == 'mongo') {
+                return Db::connect('mongo')->name($table)->data($data)->save();
+            }
+            return Db::name($table)->data($data)->save();
+        } catch (\Exception $e) {
+            Log::channel('file')->write('入库失败：' . $e->getMessage());
+            return $e->getMessage();
+        }
         // return error_log($message, 3, $destination);
     }
 
@@ -176,7 +182,7 @@ class DbLog implements LogHandlerInterface
         }
 
         if ($this->config['single']) {
-            $name        = is_string($this->config['single']) ? $this->config['single'] : 'single';
+            $name = is_string($this->config['single']) ? $this->config['single'] : 'single';
             $destination = $this->config['path'] . $name . '.log';
         } else {
 

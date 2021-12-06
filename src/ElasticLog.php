@@ -6,7 +6,7 @@
 * 日    期：2021/11/25
 */
 
-namespace xiegaosheng\think\log\driver;
+namespace think\log\driver;
 
 use Elasticsearch\ClientBuilder;
 use think\App;
@@ -26,15 +26,15 @@ class ElasticLog implements LogHandlerInterface
      * @var array
      */
     protected $config = [
-        'time_format'  => 'c',
-        'single'       => false,
-        'file_size'    => 2097152,
-        'path'         => '',
-        'apart_level'  => [],
-        'max_files'    => 0,
-        'json'         => false,
+        'time_format' => 'c',
+        'single' => false,
+        'file_size' => 2097152,
+        'path' => '',
+        'apart_level' => [],
+        'max_files' => 0,
+        'json' => false,
         'json_options' => JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES,
-        'format'       => '[%s][%s] %s',
+        'format' => '[%s][%s] %s',
     ];
 
     // 实例化并传入参数
@@ -55,7 +55,7 @@ class ElasticLog implements LogHandlerInterface
         if (substr($this->config['path'], -1) != DIRECTORY_SEPARATOR) {
             $this->config['path'] .= DIRECTORY_SEPARATOR;
         }
-        $this->client = ClientBuilder::create()->setHosts(config('es.hosts'))->setBasicAuthentication(config('es.user'),config('es.passwd'))->build();
+        $this->client = ClientBuilder::create()->setHosts(config('es.hosts'))->setBasicAuthentication(config('es.user'), config('es.passwd'))->build();
     }
 
     /**
@@ -91,7 +91,7 @@ class ElasticLog implements LogHandlerInterface
             if (true === $this->config['apart_level'] || in_array($type, $this->config['apart_level'])) {
                 // 独立记录的日志级别
                 $filename = $this->getApartLevelFile($path, $type);
-                $this->write($message, $filename,$type);
+                $this->write($message, $filename, $type);
                 continue;
             }
 
@@ -108,14 +108,14 @@ class ElasticLog implements LogHandlerInterface
     /**
      * 日志写入
      * @access protected
-     * @param array  $message     日志信息
+     * @param array $message 日志信息
      * @param string $destination 日志文件
      * @return bool
      */
-    protected function write(array $message, string $destination,$type=''): bool
+    protected function write(array $message, string $destination, $type = ''): bool
     {
         // 检测日志文件大小，超过配置大小则备份日志文件重新生成
-       // $this->checkLogSize($destination);
+        // $this->checkLogSize($destination);
 
         $info = [];
 
@@ -130,13 +130,12 @@ class ElasticLog implements LogHandlerInterface
         $runtime = 0;
         if (isset($info['sql']))//如果是sql日志记录查询时间
         {
-            if(false !== strpos($message,'[sql] SHOW FULL COLUMNS') || false !== strpos($message,'[sql] CONNECT:[ UseTime')){
+            if (false !== strpos($message, '[sql] SHOW FULL COLUMNS') || false !== strpos($message, '[sql] CONNECT:[ UseTime')) {
                 return true;
-            }else{
+            } else {
                 $cnt = count($info);
-                $runtime_arr = explode(':',trim($info[$cnt-1]));
-                if (count($runtime_arr) == 2)
-                {
+                $runtime_arr = explode(':', trim($info[$cnt - 1]));
+                if (count($runtime_arr) == 2) {
                     $runtime = floatval($runtime_arr[1]);
                 }
             }
@@ -144,20 +143,18 @@ class ElasticLog implements LogHandlerInterface
         $data['runtime'] = $runtime;
         $index = config('es.table');
         //日志通知
-        if (isset($this->config['notice']) && $this->config['notice'] instanceof NoticeLog)
-        {
+        if (isset($this->config['notice']) && $this->config['notice'] instanceof NoticeLog) {
             try {
                 $notice = new $this->config['notice']();
                 $notice->run($data);
-            }catch (\Exception $e)
-            {
-                Log::channel('file')->write('日志通知失败'.$e->getMessage());
+            } catch (\Exception $e) {
+                Log::channel('file')->write('日志通知失败' . $e->getMessage());
             }
 
         }
-        return $this->addAllDos([$data],$index);
+        return $this->addAllDos([$data], $index);
 
-       // return error_log($message, 3, $destination);
+        // return error_log($message, 3, $destination);
     }
 
     /**
@@ -181,7 +178,7 @@ class ElasticLog implements LogHandlerInterface
         }
 
         if ($this->config['single']) {
-            $name        = is_string($this->config['single']) ? $this->config['single'] : 'single';
+            $name = is_string($this->config['single']) ? $this->config['single'] : 'single';
             $destination = $this->config['path'] . $name . '.log';
         } else {
 
@@ -239,19 +236,19 @@ class ElasticLog implements LogHandlerInterface
 
     /**
      * @describe:批量插入es
-     * @author: xiegaosheng
-     * @date: 2021/11/25
      * @param array $data
      * @param string $index
      * @return bool
+     * @author: xiegaosheng
+     * @date: 2021/11/25
      */
-    public function addAllDos(array $data,$index='')
+    public function addAllDos(array $data, $index = '')
     {
-        foreach ($data as $param){
+        foreach ($data as $param) {
             $params['body'][] = [
                 'index' => [   #创建或替换
-                    '_index' => config('es.prefix').$index,
-                    '_id' => $param['id'],
+                    '_index' => config('es.prefix') . $index,
+                    //'_id' => $param['id'],
                 ],
             ];
             $params['body'][] = $param;
