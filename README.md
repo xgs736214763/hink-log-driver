@@ -1,5 +1,5 @@
 # think-log-driver
-hink-log-driver
+thinkphp6的日志驱动支持elastic和mysql，mongodb
 #es配置
 * es.php
 ~~~
